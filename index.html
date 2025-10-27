@@ -1,214 +1,194 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aplikasi Penilaian dan Absensi</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Latihan Koding dan AI - Plugged & Unplugged</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f5f7fa;
-      margin: 0; padding: 0;
+      font-family: "Poppins", sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
     }
     header {
-      background: #0066cc;
+      background-color: #2d6cdf;
       color: white;
-      padding: 15px;
       text-align: center;
-      font-size: 1.4em;
-      font-weight: bold;
+      padding: 1.5em 0;
+      font-size: 1.6em;
+      letter-spacing: 0.5px;
     }
     main {
-      display: flex;
-      flex-wrap: wrap;
-      padding: 10px;
-      gap: 20px;
-      justify-content: center;
-    }
-    section {
+      max-width: 900px;
+      margin: 30px auto;
       background: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      width: 500px;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     h2 {
-      margin-top: 0;
-      border-bottom: 2px solid #eee;
+      color: #2d6cdf;
+      border-bottom: 2px solid #2d6cdf;
       padding-bottom: 5px;
-      color: #333;
     }
-    input, select, button {
-      margin: 5px 0;
-      padding: 6px;
-      border-radius: 5px;
+    .section {
+      margin-top: 25px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
       border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
-      background: #0066cc;
+      margin-top: 10px;
+      padding: 10px 18px;
+      background-color: #2d6cdf;
       color: white;
       border: none;
+      border-radius: 6px;
       cursor: pointer;
-      transition: 0.2s;
+      transition: 0.3s;
     }
     button:hover {
-      background: #004999;
+      background-color: #1b4fa0;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 20px;
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: center;
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
     }
     th {
-      background: #e6f0ff;
+      background-color: #e9f1ff;
     }
-    .ghost {
-      background: none;
-      border: none;
-      color: #0066cc;
+    .delete-btn {
+      background-color: #dc3545;
+      padding: 6px 12px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 0.9em;
+    }
+    .delete-btn:hover {
+      background-color: #b02a37;
+    }
+    footer {
+      text-align: center;
+      margin: 40px 0;
+      color: #777;
     }
   </style>
 </head>
 <body>
+  <header>
+    💡 Latihan Koding & Kecerdasan Artifisial (AI)
+  </header>
 
-<header>📘 Aplikasi Penilaian & Absensi Siswa</header>
+  <main>
+    <section class="section">
+      <h2>Aktivitas Plugged dan Unplugged</h2>
+      <p>
+        Berikut adalah latihan sederhana yang menggabungkan konsep
+        <strong>plugged</strong> (menggunakan komputer) dan
+        <strong>unplugged</strong> (tanpa komputer).
+      </p>
+      <ul>
+        <li><b>Plugged:</b> Membuat simulasi logika berpikir dengan HTML & JavaScript.</li>
+        <li><b>Unplugged:</b> Diskusi dan perancangan algoritma secara manual.</li>
+      </ul>
+    </section>
 
-<main>
-  <section>
-    <h2>📚 Manajemen Kelas</h2>
-    <input type="text" id="inputClass" placeholder="Nama kelas (misal: 7A)">
-    <button id="btnAddClass">Tambah Kelas</button>
-    <select id="classSelect"></select>
-    <button id="btnDeleteClass">Hapus Kelas</button>
-  </section>
+    <section class="section">
+      <h2>Latihan Menambah dan Menghapus Data</h2>
+      <p>Masukkan data latihan yang ingin kamu simpan.</p>
 
-  <section>
-    <h2>👩‍🏫 Data Siswa & Penilaian</h2>
-    <input type="text" id="inputStudent" placeholder="Nama siswa">
-    <button id="btnAddStudent">Tambah Siswa</button>
-    <table id="scoreTable">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
-    <button id="btnAddAssessment">Tambah Penilaian</button>
-    <button id="btnExportScoresCSV">Ekspor Nilai (CSV)</button>
-  </section>
+      <label for="nama">Nama:</label>
+      <input type="text" id="nama" placeholder="Masukkan nama kamu" />
 
-  <section>
-    <h2>🕒 Absensi Siswa</h2>
-    <input type="text" id="inputMeetName" placeholder="Nama pertemuan">
-    <button id="btnAddMeeting">Tambah Pertemuan</button>
-    <table id="attTable">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
-  </section>
-</main>
+      <label for="proyek">Judul Proyek AI:</label>
+      <input type="text" id="proyek" placeholder="Contoh: Chatbot Sekolah" />
 
-<script>
-  // ======== Variabel utama ========
-  const inputClass = document.getElementById('inputClass');
-  const btnAddClass = document.getElementById('btnAddClass');
-  const btnDeleteClass = document.getElementById('btnDeleteClass');
-  const classSelect = document.getElementById('classSelect');
-  const inputStudent = document.getElementById('inputStudent');
-  const btnAddStudent = document.getElementById('btnAddStudent');
-  const btnAddAssessment = document.getElementById('btnAddAssessment');
-  const btnExportScoresCSV = document.getElementById('btnExportScoresCSV');
-  const scoreTable = document.getElementById('scoreTable');
-  const inputMeetName = document.getElementById('inputMeetName');
-  const btnAddMeeting = document.getElementById('btnAddMeeting');
-  const attTable = document.getElementById('attTable');
+      <button onclick="tambahData()">Tambah Data</button>
 
-  let classActive = '';
+      <table id="tabelData">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Judul Proyek AI</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-  // ======== Data handling ========
-  function saveData(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
-  }
+    <section class="section">
+      <h2>Refleksi Pembelajaran</h2>
+      <p>
+        Setelah mengisi tabel di atas, renungkan hal berikut:
+      </p>
+      <ul>
+        <li>Apa yang kamu pelajari dari latihan ini?</li>
+        <li>Bagaimana penerapan AI dalam kehidupan sehari-hari?</li>
+        <li>Bagaimana hubungan antara berpikir komputasional dan kreativitas?</li>
+      </ul>
+    </section>
+  </main>
 
-  function loadData(key) {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  }
+  <footer>
+    &copy; 2025 - Dikembangkan oleh <b>Amin Wahyudi, S.Pd.</b> | SMPN 2 Jetis
+  </footer>
 
-  function saveScores(kelas, data) {
-    saveData(`scores_${kelas}`, data);
-  }
+  <script>
+    let data = [];
 
-  function loadScores(kelas) {
-    return JSON.parse(localStorage.getItem(`scores_${kelas}`) || '{"students":[],"assessments":[],"matrix":[]}');
-  }
-
-  function saveAttendance(kelas, data) {
-    saveData(`attendance_${kelas}`, data);
-  }
-
-  function loadAttendance(kelas) {
-    return JSON.parse(localStorage.getItem(`attendance_${kelas}`) || '{"students":[],"meetings":[],"matrix":[]}');
-  }
-
-  // ======== Inisialisasi Kelas ========
-  function refreshClassList() {
-    const classes = loadData('classList');
-    classSelect.innerHTML = '';
-    if (classes.length === 0) {
-      classActive = '';
-      return;
+    function tampilkanData() {
+      const tbody = document.querySelector("#tabelData tbody");
+      tbody.innerHTML = "";
+      data.forEach((item, index) => {
+        const row = `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${item.nama}</td>
+            <td>${item.proyek}</td>
+            <td><span class="delete-btn" onclick="hapusData(${index})">Hapus</span></td>
+          </tr>`;
+        tbody.innerHTML += row;
+      });
     }
-    classes.forEach(k => {
-      const opt = document.createElement('option');
-      opt.value = k;
-      opt.textContent = k;
-      classSelect.appendChild(opt);
-    });
-    if (!classActive || !classes.includes(classActive)) {
-      classActive = classes[0];
+
+    function tambahData() {
+      const nama = document.getElementById("nama").value.trim();
+      const proyek = document.getElementById("proyek").value.trim();
+
+      if (nama === "" || proyek === "") {
+        alert("Harap isi semua kolom terlebih dahulu!");
+        return;
+      }
+
+      data.push({ nama, proyek });
+      document.getElementById("nama").value = "";
+      document.getElementById("proyek").value = "";
+      tampilkanData();
     }
-    classSelect.value = classActive;
-    renderAll();
-  }
 
-  btnAddClass.addEventListener('click', () => {
-    const cname = inputClass.value.trim();
-    if (!cname) { alert('Nama kelas tidak boleh kosong'); return; }
-    const classes = loadData('classList');
-    if (classes.includes(cname)) { alert('Kelas sudah ada'); return; }
-    classes.push(cname);
-    saveData('classList', classes);
-    inputClass.value = '';
-    refreshClassList();
-  });
-
-  btnDeleteClass.addEventListener('click', () => {
-    if (!classActive) return;
-    if (!confirm(`Hapus kelas ${classActive}?`)) return;
-    let classes = loadData('classList').filter(k => k !== classActive);
-    saveData('classList', classes);
-    localStorage.removeItem(`scores_${classActive}`);
-    localStorage.removeItem(`attendance_${classActive}`);
-    refreshClassList();
-  });
-
-  classSelect.addEventListener('change', () => {
-    classActive = classSelect.value;
-    renderAll();
-  });
-
-  // ======== Penilaian ========
-  function renderScoresTable() {
-    const thead = scoreTable.querySelector('thead');
-    const tbody = scoreTable.querySelector('tbody');
-    thead.innerHTML = ''; tbody.innerHTML = '';
-    if (!classActive) return;
-
-    const data = loadScores(classActive);
-    const trh = document.createElement('tr');
-    trh.innerHTML = '<th>No</th><th>Nama</th>';
-    (data.assessments || []).forEach((a, i) => {
+    function hapusData(index) {
+      if (confirm("Yakin ingin menghapus data ini?")) {
+        data.splice(index, 1);
+        tampilkanData();
+      }
+    }
+  </script>
+</body>
+</html>
