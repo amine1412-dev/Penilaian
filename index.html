@@ -1,637 +1,214 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Sistem Penilaian & Absensi — Multi Kelas (Offline)</title>
-
-<!-- XLSX library for Excel import/export -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-<style>
-  :root{ --p:#1565c0; --muted:#6b7280; --card:#ffffff; --bg:#f3f6fb; }
-  *{box-sizing:border-box}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);margin:0;color:#111}
-  header{background:linear-gradient(90deg,var(--p),#2b6cb0);color:#fff;padding:14px 18px}
-  header h1{margin:0;font-size:1.1rem}
-  .container{max-width:1150px;margin:18px auto;padding:12px}
-  .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(12,20,40,.06);margin-bottom:12px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  label{font-size:.92rem;color:var(--muted)}
-  input[type=text], select, input[type=file], input[type=number]{padding:8px;border-radius:8px;border:1px solid #e6eef8}
-  button{background:var(--p);color:#fff;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
-  button.ghost{background:#fff;color:var(--p);border:1px solid #dbe9ff}
-  button.warn{background:#f59e0b}
-  nav.tabs{display:flex;gap:6px}
-  nav.tabs button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.12);padding:8px 12px;border-radius:8px;cursor:pointer}
-  nav.tabs button.active{background:#fff;color:var(--p)}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border:1px solid #e6eef8;padding:8px;text-align:center;font-size:.95rem;background:#fff}
-  th{background:#f7fbff;color:var(--p)}
-  td.editable{min-width:90px}
-  .muted{color:var(--muted);font-size:.9rem}
-  .actions{display:flex;gap:8px;flex-wrap:wrap}
-  .right{margin-left:auto}
-  @media print{
-    header, .no-print, .actions button, input[type=file], nav.tabs {display:none}
-    body{background:#fff}
-    .container{max-width:100%;padding:0}
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Penilaian dan Absensi</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      margin: 0; padding: 0;
+    }
+    header {
+      background: #0066cc;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 10px;
+      gap: 20px;
+      justify-content: center;
+    }
+    section {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      width: 500px;
+    }
+    h2 {
+      margin-top: 0;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 5px;
+      color: #333;
+    }
+    input, select, button {
+      margin: 5px 0;
+      padding: 6px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #004999;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+    th {
+      background: #e6f0ff;
+    }
+    .ghost {
+      background: none;
+      border: none;
+      color: #0066cc;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div style="display:flex;align-items:center;justify-content:space-between;max-width:1150px;margin:0 auto">
-    <div>
-      <h1>Sistem Penilaian & Absensi — Multi Kelas</h1>
-      <div style="font-size:.9rem;color:rgba(255,255,255,.9)">Offline — disimpan di browser (LocalStorage). Impor/Export Excel & JSON tersedia.</div>
-    </div>
-    <div>
-      <nav class="tabs">
-        <button id="tab-kelas" class="active">Kelas</button>
-        <button id="tab-penilaian">Penilaian</button>
-        <button id="tab-absensi">Absensi</button>
-      </nav>
-    </div>
-  </div>
-</header>
 
-<main class="container">
-  <!-- KELAS -->
-  <section id="page-kelas" class="card">
-    <h2 style="margin:0 0 8px 0">Manajemen Kelas</h2>
-    <div class="row" style="align-items:center">
-      <input id="inputNewClass" type="text" placeholder="Nama kelas baru (mis: 7A)">
-      <button id="btnAddClass">+ Tambah Kelas</button>
+<header>📘 Aplikasi Penilaian & Absensi Siswa</header>
 
-      <label style="margin-left:8px">Pilih Kelas:</label>
-      <select id="selectClass"></select>
-      <button id="btnLoadClass" class="ghost">Muat</button>
-      <button id="btnDeleteClass" class="warn">Hapus Kelas</button>
-
-      <div class="right">
-        <button id="btnExportAll" class="ghost">Export Semua (JSON)</button>
-        <button id="btnImportAll" class="ghost">Import JSON</button>
-        <input id="fileImportAll" type="file" accept=".json" style="display:none"/>
-      </div>
-    </div>
-
-    <div style="margin-top:10px" class="muted">
-      Catatan: Data tiap kelas (siswa, penilaian, absensi) disimpan terpisah. Menghapus kelas akan menghapus semua data kelas tersebut dari browser.
-    </div>
+<main>
+  <section>
+    <h2>📚 Manajemen Kelas</h2>
+    <input type="text" id="inputClass" placeholder="Nama kelas (misal: 7A)">
+    <button id="btnAddClass">Tambah Kelas</button>
+    <select id="classSelect"></select>
+    <button id="btnDeleteClass">Hapus Kelas</button>
   </section>
 
-  <!-- PENILAIAN -->
-  <section id="page-penilaian" class="card" style="display:none">
-    <h2 style="margin:0 0 8px 0">Penilaian — <span id="labelClassPenilaian" style="font-weight:700">[Pilih Kelas]</span></h2>
-
-    <div class="row">
-      <input id="inputStudentName" type="text" placeholder="Tambah siswa (nama)">
-      <button id="btnAddStudent">+ Tambah Siswa</button>
-
-      <input id="inputAssessName" type="text" placeholder="Nama penilaian (mis: Tugas 1)">
-      <button id="btnAddAssess">+ Tambah Penilaian</button>
-
-      <div class="actions right">
-        <input id="fileStudents" type="file" accept=".xlsx,.xls" />
-        <button id="btnImportStudents" class="ghost">Impor Siswa dari Excel</button>
-
-        <button id="btnExportScores" class="ghost">Export Nilai (Excel)</button>
-        <button id="btnExportScoresCSV" class="ghost">Export Nilai (CSV)</button>
-
-        <button id="btnPrintScores">Cetak Rekap Nilai</button>
-      </div>
-    </div>
-
-    <div style="margin-top:10px" class="card" id="scoresCard">
-      <div class="muted">Klik di dalam sel untuk mengedit. Tekan Enter atau klik di luar untuk menyimpan (otomatis tersimpan).</div>
-      <div style="overflow:auto;margin-top:8px">
-        <table id="scoresTable"><thead></thead><tbody></tbody></table>
-      </div>
-    </div>
+  <section>
+    <h2>👩‍🏫 Data Siswa & Penilaian</h2>
+    <input type="text" id="inputStudent" placeholder="Nama siswa">
+    <button id="btnAddStudent">Tambah Siswa</button>
+    <table id="scoreTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+    <button id="btnAddAssessment">Tambah Penilaian</button>
+    <button id="btnExportScoresCSV">Ekspor Nilai (CSV)</button>
   </section>
 
-  <!-- ABSENSI -->
-  <section id="page-absensi" class="card" style="display:none">
-    <h2 style="margin:0 0 8px 0">Absensi — <span id="labelClassAbsensi" style="font-weight:700">[Pilih Kelas]</span></h2>
-
-    <div class="row">
-      <input id="inputAttendStudent" type="text" placeholder="Tambah siswa (nama)">
-      <button id="btnAddAttendStudent">+ Tambah Siswa</button>
-
-      <input id="inputMeetName" type="text" placeholder="Nama pertemuan (mis: Pert 1)">
-      <button id="btnAddMeeting">+ Tambah Pertemuan</button>
-
-      <div class="actions right">
-        <button id="btnExportAttCSV" class="ghost">Export Absensi (CSV)</button>
-        <button id="btnPrintAtt">Cetak Rekap Absensi</button>
-      </div>
-    </div>
-
-    <div style="margin-top:10px" class="card" id="attCard">
-      <div class="muted">Gunakan nilai: H (Hadir), S (Sakit), I (Izin), A (Alpa). Klik sel untuk edit.</div>
-      <div style="overflow:auto;margin-top:8px">
-        <table id="attTable"><thead></thead><tbody></tbody></table>
-      </div>
-    </div>
+  <section>
+    <h2>🕒 Absensi Siswa</h2>
+    <input type="text" id="inputMeetName" placeholder="Nama pertemuan">
+    <button id="btnAddMeeting">Tambah Pertemuan</button>
+    <table id="attTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
   </section>
 </main>
 
 <script>
-/* ==========================
-   Storage keys & helpers
-   ========================== */
-const CLASS_LIST_KEY = 'kelasList_v1';
-function classStudentsKey(cls){ return `students_${cls}`; }
-function classScoresKey(cls){ return `scores_${cls}`; } // scores: array of {name, scores: []}
-function classAttendanceKey(cls){ return `attendance_${cls}`; } // attendance: array of {name, attend: []}
+  // ======== Variabel utama ========
+  const inputClass = document.getElementById('inputClass');
+  const btnAddClass = document.getElementById('btnAddClass');
+  const btnDeleteClass = document.getElementById('btnDeleteClass');
+  const classSelect = document.getElementById('classSelect');
+  const inputStudent = document.getElementById('inputStudent');
+  const btnAddStudent = document.getElementById('btnAddStudent');
+  const btnAddAssessment = document.getElementById('btnAddAssessment');
+  const btnExportScoresCSV = document.getElementById('btnExportScoresCSV');
+  const scoreTable = document.getElementById('scoreTable');
+  const inputMeetName = document.getElementById('inputMeetName');
+  const btnAddMeeting = document.getElementById('btnAddMeeting');
+  const attTable = document.getElementById('attTable');
 
-function loadClassList(){
-  try{ return JSON.parse(localStorage.getItem(CLASS_LIST_KEY)) || []; } catch(e){ return []; }
-}
-function saveClassList(list){ localStorage.setItem(CLASS_LIST_KEY, JSON.stringify(list)); }
+  let classActive = '';
 
-/* ==========================
-   App state
-   ========================== */
-let kelasList = loadClassList();
-let classActive = kelasList.length ? kelasList[0] : null;
-
-/* ==========================
-   UI refs
-   ========================== */
-const tabKelas = document.getElementById('tab-kelas');
-const tabPenilaian = document.getElementById('tab-penilaian');
-const tabAbsensi = document.getElementById('tab-absensi');
-
-const pageKelas = document.getElementById('page-kelas');
-const pagePenilaian = document.getElementById('page-penilaian');
-const pageAbsensi = document.getElementById('page-absensi');
-
-const selectClass = document.getElementById('selectClass');
-const inputNewClass = document.getElementById('inputNewClass');
-const btnAddClass = document.getElementById('btnAddClass');
-const btnLoadClass = document.getElementById('btnLoadClass');
-const btnDeleteClass = document.getElementById('btnDeleteClass');
-const btnExportAll = document.getElementById('btnExportAll');
-const btnImportAll = document.getElementById('btnImportAll');
-const fileImportAll = document.getElementById('fileImportAll');
-
-const labelClassPenilaian = document.getElementById('labelClassPenilaian');
-const labelClassAbsensi = document.getElementById('labelClassAbsensi');
-
-/* Penilaian refs */
-const inputStudentName = document.getElementById('inputStudentName');
-const btnAddStudent = document.getElementById('btnAddStudent');
-const inputAssessName = document.getElementById('inputAssessName');
-const btnAddAssess = document.getElementById('btnAddAssess');
-const fileStudents = document.getElementById('fileStudents');
-const btnImportStudents = document.getElementById('btnImportStudents');
-const btnExportScores = document.getElementById('btnExportScores');
-const btnExportScoresCSV = document.getElementById('btnExportScoresCSV');
-const btnPrintScores = document.getElementById('btnPrintScores');
-const scoresTable = document.getElementById('scoresTable');
-
-/* Absensi refs */
-const inputAttendStudent = document.getElementById('inputAttendStudent');
-const btnAddAttendStudent = document.getElementById('btnAddAttendStudent');
-const inputMeetName = document.getElementById('inputMeetName');
-const btnAddMeeting = document.getElementById('btnAddMeeting');
-const attTable = document.getElementById('attTable');
-const btnExportAttCSV = document.getElementById('btnExportAttCSV');
-const btnPrintAtt = document.getElementById('btnPrintAtt');
-
-/* Init UI */
-function init(){
-  renderClassOptions();
-  bindTabs();
-  if(classActive) selectClass.value = classActive;
-  updateClassLabels();
-  renderAll();
-}
-init();
-
-/* ==========================
-   Tab nav
-   ========================== */
-function bindTabs(){
-  tabKelas.addEventListener('click', ()=> showPage('kelas'));
-  tabPenilaian.addEventListener('click', ()=> showPage('penilaian'));
-  tabAbsensi.addEventListener('click', ()=> showPage('absensi'));
-}
-function showPage(page){
-  tabKelas.classList.remove('active'); tabPenilaian.classList.remove('active'); tabAbsensi.classList.remove('active');
-  pageKelas.style.display='none'; pagePenilaian.style.display='none'; pageAbsensi.style.display='none';
-  if(page==='kelas'){ tabKelas.classList.add('active'); pageKelas.style.display='block' }
-  if(page==='penilaian'){ tabPenilaian.classList.add('active'); pagePenilaian.style.display='block' }
-  if(page==='absensi'){ tabAbsensi.classList.add('active'); pageAbsensi.style.display='block' }
-}
-
-/* ==========================
-   Kelas: add / delete / load
-   ========================== */
-function renderClassOptions(){
-  selectClass.innerHTML = '';
-  kelasList = loadClassList();
-  kelasList.forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k; opt.textContent = k;
-    selectClass.appendChild(opt);
-  });
-  if(classActive && kelasList.includes(classActive)){
-    selectClass.value = classActive;
-  } else if(kelasList.length){
-    classActive = kelasList[0]; selectClass.value = classActive;
-  } else {
-    classActive = null;
+  // ======== Data handling ========
+  function saveData(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
   }
-  updateClassLabels();
-  renderAll();
-}
-btnAddClass.addEventListener('click', ()=>{
-  const name = inputNewClass.value.trim();
-  if(!name){ alert('Masukkan nama kelas'); return; }
-  if(kelasList.includes(name)){ alert('Kelas sudah ada'); inputNewClass.value=''; return; }
-  kelasList.push(name); saveClassList(kelasList); inputNewClass.value=''; classActive = name; renderClassOptions(); alert(`Kelas "${name}" berhasil dibuat`); 
-});
-btnLoadClass.addEventListener('click', ()=>{
-  const name = selectClass.value;
-  if(!name){ alert('Pilih kelas dulu'); return; }
-  classActive = name; updateClassLabels(); renderAll();
-});
-btnDeleteClass.addEventListener('click', ()=>{
-  const name = selectClass.value;
-  if(!name){ alert('Pilih kelas'); return; }
-  if(!confirm(`Hapus kelas "${name}" beserta seluruh datanya?`)) return;
-  // remove class and all keys
-  kelasList = kelasList.filter(k=>k!==name); saveClassList(kelasList);
-  localStorage.removeItem(classStudentsKey(name));
-  localStorage.removeItem(classScoresKey(name));
-  localStorage.removeItem(classAttendanceKey(name));
-  if(kelasList.length) classActive = kelasList[0]; else classActive = null;
-  renderClassOptions();
-});
-btnExportAll.addEventListener('click', ()=>{
-  // export entire semuaKelas data
-  const all = { kelasList };
-  kelasList.forEach(k=>{
-    all[k] = {
-      students: JSON.parse(localStorage.getItem(classStudentsKey(k))) || [],
-      scores: JSON.parse(localStorage.getItem(classScoresKey(k))) || [],
-      attendance: JSON.parse(localStorage.getItem(classAttendanceKey(k))) || []
-    };
-  });
-  const blob = new Blob([JSON.stringify(all,null,2)], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'all_kelas_data.json'; a.click();
-});
-btnImportAll.addEventListener('click', ()=> fileImportAll.click());
-fileImportAll.addEventListener('change', e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader();
-  r.onload = function(ev){
-    try{
-      const obj = JSON.parse(ev.target.result);
-      if(!obj.kelasList){ alert('Format JSON tidak sesuai'); return; }
-      // write
-      saveClassList(obj.kelasList);
-      obj.kelasList.forEach(k=>{
-        localStorage.setItem(classStudentsKey(k), JSON.stringify(obj[k].students || []));
-        localStorage.setItem(classScoresKey(k), JSON.stringify(obj[k].scores || []));
-        localStorage.setItem(classAttendanceKey(k), JSON.stringify(obj[k].attendance || []));
-      });
-      kelasList = loadClassList();
-      classActive = kelasList.length ? kelasList[0] : null;
-      renderClassOptions();
-      alert('Import data selesai');
-    } catch(err){ alert('Gagal import: '+err) }
-  };
-  r.readAsText(f);
-});
 
-/* ==========================
-   Helpers to load/save per class
-   ========================== */
-function loadStudents(cls){
-  return JSON.parse(localStorage.getItem(classStudentsKey(cls))) || [];
-}
-function saveStudents(cls, arr){
-  localStorage.setItem(classStudentsKey(cls), JSON.stringify(arr));
-}
-function loadScores(cls){
-  // scores: { students: [name,...], assessments: [names..], matrix: [[...],[...]] } 
-  return JSON.parse(localStorage.getItem(classScoresKey(cls))) || { students: [], assessments: [], matrix: [] };
-}
-function saveScores(cls, obj){
-  localStorage.setItem(classScoresKey(cls), JSON.stringify(obj));
-}
-function loadAttendance(cls){
-  // attendance: { students: [], meetings: [], matrix: [] } - matrix stores H/S/I/A strings
-  return JSON.parse(localStorage.getItem(classAttendanceKey(cls))) || { students: [], meetings: [], matrix: [] };
-}
-function saveAttendance(cls, obj){
-  localStorage.setItem(classAttendanceKey(cls), JSON.stringify(obj));
-}
+  function loadData(key) {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  }
 
-function updateClassLabels(){
-  labelClassPenilaian.textContent = classActive || '[Pilih Kelas]';
-  labelClassAbsensi.textContent = classActive || '[Pilih Kelas]';
-}
+  function saveScores(kelas, data) {
+    saveData(`scores_${kelas}`, data);
+  }
 
-/* ==========================
-   PENILAIAN logic
-   ========================== */
-btnAddStudent.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  const name = inputStudentName.value.trim(); if(!name){ alert('Masukkan nama siswa'); return; }
-  // students array used only for reference; scores store main structure
-  const scores = loadScores(classActive);
-  scores.students = scores.students || [];
-  scores.matrix = scores.matrix || [];
-  // add student
-  scores.students.push(name);
-  // add scores row with empty for each assessment
-  scores.matrix.push(Array(scores.assessments.length).fill(''));
-  saveScores(classActive, scores);
-  inputStudentName.value='';
-  renderScoresTable();
-});
+  function loadScores(kelas) {
+    return JSON.parse(localStorage.getItem(`scores_${kelas}`) || '{"students":[],"assessments":[],"matrix":[]}');
+  }
 
-btnAddAssess.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  const aname = inputAssessName.value.trim(); if(!aname){ alert('Masukkan nama penilaian'); return; }
-  const scores = loadScores(classActive);
-  scores.assessments = scores.assessments || [];
-  scores.matrix = scores.matrix || [];
-  scores.assessments.push(aname);
-  // extend every student row
-  for(let r=0;r<scores.matrix.length;r++) scores.matrix[r].push('');
-  saveScores(classActive, scores);
-  inputAssessName.value='';
-  renderScoresTable();
-});
+  function saveAttendance(kelas, data) {
+    saveData(`attendance_${kelas}`, data);
+  }
 
-btnImportStudents.addEventListener('click', ()=>{
-  fileStudents.click();
-});
-fileStudents.addEventListener('change', (e)=>{
-  const f = e.target.files[0]; if(!f) return;
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    const wb = XLSX.read(ev.target.result, {type:'binary'});
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const arr = XLSX.utils.sheet_to_json(sheet, {header:1});
-    const names = arr.slice(1).map(r => r[0]).filter(Boolean);
-    if(!classActive){ alert('Pilih kelas dahulu'); return; }
-    const scores = loadScores(classActive);
-    scores.students = scores.students || [];
-    scores.matrix = scores.matrix || [];
-    names.forEach(n=>{
-      scores.students.push(n);
-      scores.matrix.push(Array(scores.assessments.length).fill(''));
+  function loadAttendance(kelas) {
+    return JSON.parse(localStorage.getItem(`attendance_${kelas}`) || '{"students":[],"meetings":[],"matrix":[]}');
+  }
+
+  // ======== Inisialisasi Kelas ========
+  function refreshClassList() {
+    const classes = loadData('classList');
+    classSelect.innerHTML = '';
+    if (classes.length === 0) {
+      classActive = '';
+      return;
+    }
+    classes.forEach(k => {
+      const opt = document.createElement('option');
+      opt.value = k;
+      opt.textContent = k;
+      classSelect.appendChild(opt);
     });
-    saveScores(classActive, scores);
-    renderScoresTable();
-    alert(`Impor ${names.length} siswa selesai`);
-  };
-  reader.readAsBinaryString(f);
-  e.target.value='';
-});
+    if (!classActive || !classes.includes(classActive)) {
+      classActive = classes[0];
+    }
+    classSelect.value = classActive;
+    renderAll();
+  }
 
-btnExportScores.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  const scores = loadScores(classActive);
-  const header = ['No','Nama', ...scores.assessments];
-  const rows = scores.students.map((name,i)=> [i+1, name, ... (scores.matrix[i] || []) ]);
-  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, classActive);
-  XLSX.writeFile(wb, `Nilai_${classActive}.xlsx`);
-});
-
-btnExportScoresCSV.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'; return; }
-  const scores = loadScores(classActive);
-  const header = ['No','Nama', ...scores.assessments];
-  const rows = scores.students.map((name,i)=> [i+1, name, ... (scores.matrix[i] || []) ]);
-  const csv = [header, ...rows].map(r=> r.map(cell=> {
-    if(cell===undefined||cell===null) return '';
-    const s = String(cell);
-    return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s;
-  }).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Nilai_${classActive}.csv`; a.click();
-});
-
-function renderScoresTable(){
-  if(!classActive){ scoresTable.querySelector('thead').innerHTML=''; scoresTable.querySelector('tbody').innerHTML=''; return; }
-  const scores = loadScores(classActive);
-  const thead = scoresTable.querySelector('thead'); const tbody = scoresTable.querySelector('tbody');
-  thead.innerHTML = ''; tbody.innerHTML = '';
-  const trh = document.createElement('tr');
-  trh.innerHTML = '<th>No</th><th>Nama</th>';
-  (scores.assessments||[]).forEach((a,i)=>{
-    trh.innerHTML += `<th>${a}<br><button class="ghost" onclick="deleteAssessment(${i})">Hapus</button></th>`;
+  btnAddClass.addEventListener('click', () => {
+    const cname = inputClass.value.trim();
+    if (!cname) { alert('Nama kelas tidak boleh kosong'); return; }
+    const classes = loadData('classList');
+    if (classes.includes(cname)) { alert('Kelas sudah ada'); return; }
+    classes.push(cname);
+    saveData('classList', classes);
+    inputClass.value = '';
+    refreshClassList();
   });
-  trh.innerHTML += '<th>Rata-rata</th><th>Aksi</th>';
-  thead.appendChild(trh);
 
-  (scores.students||[]).forEach((name, r)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r+1}</td>
-      <td contenteditable="true" class="editable" onblur="editScoreName(${r}, this.innerText)">${name}</td>`;
-    const row = scores.matrix[r] || [];
-    (scores.assessments||[]).forEach((_, c)=>{
-      const val = row[c]===undefined ? '' : row[c];
-      tr.innerHTML += `<td contenteditable="true" class="editable" onblur="editScoreCell(${r}, ${c}, this.innerText)">${val}</td>`;
-    });
-    const avg = calculateAvg(row);
-    tr.innerHTML += `<td>${avg===null? '-': avg}</td>`;
-    tr.innerHTML += `<td><button class="ghost" onclick="deleteStudentScore(${r})">Hapus</button></td>`;
-    tbody.appendChild(tr);
+  btnDeleteClass.addEventListener('click', () => {
+    if (!classActive) return;
+    if (!confirm(`Hapus kelas ${classActive}?`)) return;
+    let classes = loadData('classList').filter(k => k !== classActive);
+    saveData('classList', classes);
+    localStorage.removeItem(`scores_${classActive}`);
+    localStorage.removeItem(`attendance_${classActive}`);
+    refreshClassList();
   });
-}
 
-function editScoreName(r, val){
-  const scores = loadScores(classActive);
-  scores.students[r] = val;
-  saveScores(classActive, scores);
-}
-function editScoreCell(r,c,val){
-  const scores = loadScores(classActive);
-  scores.matrix[r] = scores.matrix[r] || Array(scores.assessments.length).fill('');
-  scores.matrix[r][c] = val;
-  saveScores(classActive, scores);
-  renderScoresTable();
-}
-function deleteAssessment(c){
-  if(!confirm('Hapus kolom penilaian ini?')) return;
-  const scores = loadScores(classActive);
-  scores.assessments.splice(c,1);
-  scores.matrix.forEach(row=> row.splice(c,1));
-  saveScores(classActive, scores); renderScoresTable();
-}
-function deleteStudentScore(r){
-  if(!confirm('Hapus siswa ini (nilai akan dihapus)?')) return;
-  const scores = loadScores(classActive);
-  scores.students.splice(r,1);
-  scores.matrix.splice(r,1);
-  saveScores(classActive, scores); renderScoresTable();
-}
-
-function calculateAvg(row){
-  if(!row || row.length===0) return null;
-  const nums = row.map(x=> Number(x)).filter(n=> !isNaN(n));
-  if(nums.length===0) return null;
-  const avg = nums.reduce((a,b)=>a+b,0)/nums.length;
-  return Math.round((avg+Number.EPSILON)*100)/100;
-}
-
-/* ==========================
-   ABSENSI logic
-   ========================== */
-btnAddAttendStudent.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  const name = inputAttendStudent.value.trim(); if(!name){ alert('Masukkan nama siswa'); return; }
-  const att = loadAttendance(classActive);
-  att.students = att.students || [];
-  att.matrix = att.matrix || [];
-  att.students.push(name);
-  att.matrix.push(Array(att.meetings ? att.meetings.length : 0).fill(''));
-  saveAttendance(classActive, att);
-  inputAttendStudent.value=''; renderAttTable();
-});
-
-btnAddMeeting.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  const mname = inputMeetName.value.trim(); if(!mname){ alert('Masukkan nama pertemuan'); return; }
-  const att = loadAttendance(classActive);
-  att.meetings = att.meetings || [];
-  att.matrix = att.matrix || [];
-  att.meetings.push(mname);
-  for(let r=0;r<att.matrix.length;r++) att.matrix[r].push('');
-  saveAttendance(classActive, att); inputMeetName.value=''; renderAttTable();
-});
-
-function renderAttTable(){
-  if(!classActive){ attTable.querySelector('thead').innerHTML=''; attTable.querySelector('tbody').innerHTML=''; return; }
-  const att = loadAttendance(classActive);
-  const thead = attTable.querySelector('thead'); const tbody = attTable.querySelector('tbody');
-  thead.innerHTML=''; tbody.innerHTML='';
-  const thr = document.createElement('tr');
-  thr.innerHTML = '<th>No</th><th>Nama</th>';
-  (att.meetings||[]).forEach((m,i)=> thr.innerHTML += `<th>${m}<br><button class="ghost" onclick="deleteMeeting(${i})">Hapus</button></th>`);
-  thr.innerHTML += '<th>Hadir (%)</th><th>Aksi</th>';
-  thead.appendChild(thr);
-
-  (att.students||[]).forEach((name, r)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r+1}</td><td contenteditable="true" onblur="editAttName(${r}, this.innerText)">${name}</td>`;
-    const row = att.matrix[r] || [];
-    (att.meetings||[]).forEach((_, c)=>{
-      const val = row[c]===undefined ? '' : row[c];
-      tr.innerHTML += `<td contenteditable="true" onblur="editAttCell(${r}, ${c}, this.innerText)">${val}</td>`;
-    });
-    const perc = calcAttPercent(row, att.meetings ? att.meetings.length : 0);
-    tr.innerHTML += `<td>${perc}%</td>`;
-    tr.innerHTML += `<td><button class="ghost" onclick="deleteAttStudent(${r})">Hapus</button></td>`;
-    tbody.appendChild(tr);
+  classSelect.addEventListener('change', () => {
+    classActive = classSelect.value;
+    renderAll();
   });
-}
-function editAttName(r,val){ const att=loadAttendance(classActive); att.students[r]=val; saveAttendance(classActive,att); }
-function editAttCell(r,c,val){ const att=loadAttendance(classActive); att.matrix[r][c]=val; saveAttendance(classActive,att); renderAttTable(); }
-function deleteMeeting(i){ if(!confirm('Hapus pertemuan ini?')) return; const att=loadAttendance(classActive); att.meetings.splice(i,1); att.matrix.forEach(row=>row.splice(i,1)); saveAttendance(classActive,att); renderAttTable(); }
-function deleteAttStudent(r){ if(!confirm('Hapus siswa ini pada absensi?')) return; const att=loadAttendance(classActive); att.students.splice(r,1); att.matrix.splice(r,1); saveAttendance(classActive,att); renderAttTable(); }
-function calcAttPercent(row, totalMeet){
-  if(!row || totalMeet===0) return 0;
-  const present = row.filter(v=> String(v).trim().toUpperCase() === 'H').length;
-  const perc = Math.round((present/totalMeet)*10000)/100;
-  return isNaN(perc)?0:perc;
-}
 
-/* ==========================
-   Export / Print functions
-   ========================== */
-btnPrintScores.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  printSection(renderScoresForPrint());
-});
-btnPrintAtt.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  printSection(renderAttendanceForPrint());
-});
+  // ======== Penilaian ========
+  function renderScoresTable() {
+    const thead = scoreTable.querySelector('thead');
+    const tbody = scoreTable.querySelector('tbody');
+    thead.innerHTML = ''; tbody.innerHTML = '';
+    if (!classActive) return;
 
-function renderScoresForPrint(){
-  const scores = loadScores(classActive);
-  let html = `<h2>Rekap Nilai - ${classActive}</h2>`;
-  html += `<table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>No</th><th>Nama</th>`;
-  (scores.assessments||[]).forEach(a=> html += `<th>${escapeHtml(a)}</th>`);
-  html += `<th>Rata-rata</th></tr></thead><tbody>`;
-  (scores.students||[]).forEach((s,i)=> {
-    html += `<tr><td>${i+1}</td><td>${escapeHtml(s)}</td>`;
-    const row = scores.matrix[i] || [];
-    (scores.assessments||[]).forEach((_,c)=> html += `<td>${escapeHtml(row[c]||'')}</td>`);
-    html += `<td>${calculateAvg(row) || '-'}</td></tr>`;
-  });
-  html += `</tbody></table>`;
-  return html;
-}
-function renderAttendanceForPrint(){
-  const att = loadAttendance(classActive);
-  let html = `<h2>Rekap Absensi - ${classActive}</h2>`;
-  html += `<table border="1" cellpadding="6" cellspacing="0"><thead><tr><th>No</th><th>Nama</th>`;
-  (att.meetings||[]).forEach(m=> html += `<th>${escapeHtml(m)}</th>`);
-  html += `<th>Hadir (%)</th></tr></thead><tbody>`;
-  (att.students||[]).forEach((s,i)=>{
-    html += `<tr><td>${i+1}</td><td>${escapeHtml(s)}</td>`;
-    const row = att.matrix[i] || [];
-    (att.meetings||[]).forEach((_,c)=> html += `<td>${escapeHtml(row[c]||'')}</td>`);
-    html += `<td>${calcAttPercent(row, att.meetings.length)}</td></tr>`;
-  });
-  html += `</tbody></table>`;
-  return html;
-}
-
-function printSection(htmlContent){
-  const w = window.open('','_blank');
-  w.document.write(`
-    <html><head><title>Print</title>
-    <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px}</style>
-    </head><body>${htmlContent}</body></html>`);
-  w.document.close();
-  setTimeout(()=>{ w.print(); },300);
-}
-
-/* ==========================
-   Export CSV absensi
-   ========================== */
-btnExportAttCSV.addEventListener('click', ()=>{
-  if(!classActive){ alert('Pilih kelas dahulu'); return; }
-  const att = loadAttendance(classActive);
-  const header = ['No','Nama', ... (att.meetings || []) , 'Hadir'];
-  const rows = (att.students || []).map((s,i)=> {
-    const row = [i+1, s];
-    row.push(... (att.matrix[i] || []));
-    row.push(calcAttPercent(att.matrix[i] || [], att.meetings.length));
-    return row;
-  });
-  const csv = [header, ...rows].map(r => r.map(c=> {
-    if(c===undefined||c===null) return '';
-    const s = String(c);
-    return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s;
-  }).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Absensi_${classActive}.csv`; a.click();
-});
-
-/* ==========================
-   Utility & render all
-   ========================== */
-function renderAll(){
-  renderClassOptions(); updateClassLabels(); renderScoresTable(); renderAttTable();
-}
-function escapeHtml(s){ return String(s || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-/* initial render */
-renderAll();
-</script>
-</body>
-</html>
+    const data = loadScores(classActive);
+    const trh = document.createElement('tr');
+    trh.innerHTML = '<th>No</th><th>Nama</th>';
+    (data.assessments || []).forEach((a, i) => {
